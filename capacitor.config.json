@@ -1,0 +1,20 @@
+{
+  "appId": "ye.alattab.shopik",
+  "appName": "شبيك",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true,
+    "allowNavigation": [
+      "https://shopik.alattab.site",
+      "https://shopik.alattab.site/*",
+      "https://*.unsplash.com"
+    ]
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true
+  }
+}

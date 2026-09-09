@@ -1,11 +1,88 @@
-<div align="center">
+# تطبيق شبيك | SHOPIK - البوابة المتكاملة للخدمات الرقمية
+### برمجة وتطوير: يمن كود للتقنيات الذكية (Yemen Code for Smart Technologies)
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+تطبيق متكامل لخدمات سداد وباقات الاتصالات اليمنية (يمن موبايل، يو YOU، سبأفون، يمن فورجي 4G، يمن نت ADSL)، المتجر الذكي، شبكات وكروت الوايفاي مع مزامنة لحظية مع خادم API.
 
-  <h1>Built with AI Studio</h2>
+---
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+## 🌟 مميزات التطبيق
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+1. **تسديد الاتصالات والباقات اللحظي:**
+   - سداد فواتير ورصيد فوري لجميع الشركات اليمنية.
+   - تفعيل الباقات الشهرية والأسبوعية وباقات الفورجي 4G.
+   - كشف الباقات والمزايا المتوفرة مباشرة من الخادم.
 
-</div>
+2. **شبكات وكروت الوايفاي (Wifi):**
+   - استعراض شبكات الوايفاي وفئات الكروت المتوفرة.
+   - نافذة تأكيد الشراء مع إدخال رقم هاتف العميل.
+   - عرض كود الكرت (PIN Code) والسيريال مع إمكانية النسخ والطباعة الفورية.
+   - تبويب خاص بـ **الكروت المشتراة** للوصول إليها في أي وقت.
+
+3. **المحفظة الذكية والمزامنة اللحظية:**
+   - مزامنة الرصيد تلقائياً كل 15 ثانية وعند فتح التطبيق.
+   - زر تحديث الرصيد اليدوي متصل مباشرة بخادم المحفظة.
+
+4. **الأمان والدخول بالبصمة:**
+   - تسجيل الدخول ببصمة الإصبع الحقيقية (WebAuthn / Biometrics).
+   - واجهة استقبال بيضاء عصرية فائقة الوضوح.
+
+---
+
+## 🚀 طريقة التشغيل والبناء (Local & Production)
+
+### 1. تشغيل التطبيق في بيئة التطوير
+```bash
+npm install
+npm run dev
+```
+
+### 2. بناء ملفات الإنتاج (Web Build)
+```bash
+npm run build
+```
+
+---
+
+## 📱 طريقة تجهيز وبناء ملف تطبيق أندرويد (APK)
+
+### الطريقة الأولى: تلقائياً عبر GitHub Actions
+1. ارفع المشروع إلى مستودع GitHub الخاص بك:
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit - Yemen Code Shopik App"
+   git branch -M main
+   git remote add origin https://github.com/YOUR_USERNAME/shopik-app.git
+   git push -u origin main
+   ```
+2. توجه إلى تبويب **Actions** في مستودعك على GitHub وستجد أن ملف الـ APK يتم بناؤه تلقائياً.
+3. قم بتحميل ملف الـ APK الجاهز من قسم **Artifacts**.
+
+---
+
+### الطريقة الثانية: محلياً عبر Capacitor و Android Studio
+1. ثبّت حزم Capacitor:
+   ```bash
+   npm install @capacitor/core @capacitor/cli @capacitor/android
+   ```
+2. قم ببناء المشروع:
+   ```bash
+   npm run build
+   ```
+3. أضف منصة أندرويد:
+   ```bash
+   npx cap add android
+   npx cap sync android
+   ```
+4. افتح مجلد `android` في **Android Studio**:
+   ```bash
+   npx cap open android
+   ```
+5. من القائمة العلوية في Android Studio اختر:
+   **Build > Build Bundle(s) / APK(s) > Build APK(s)**
+
+---
+
+## 👨‍💻 حقوق التطوير
+- **المطور:** يمن كود للتقنيات الذكية (Yemen Code for Smart Technologies)
+- **حقوق النشر:** © 2026 جميع الحقوق محفوظة

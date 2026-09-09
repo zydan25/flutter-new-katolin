@@ -1,0 +1,8 @@
+{
+  "name": "Remix Remix Remix Remix Remix تطبيق شبكة السداد - فلاتر وكوتلن",
+  "description": "واجهة شبكة السداد الحديثة بفلاتر المضمنة في تطبيق أندرويد كوتلن مع فحص الباقات والرصيد والمزامنة المحلية وتكامل API مع خادم الجانغو",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
