@@ -70,6 +70,13 @@ class MethodChannelBridge {
     } catch (_) {}
   }
 
+  /// Send result or navigation action back to Android
+  static Future<void> sendResultToAndroid(Map<String, dynamic> data) async {
+    try {
+      await _channel.invokeMethod('sendResultToAndroid', data);
+    } catch (_) {}
+  }
+
   /// Navigate back or trigger native route
   static Future<void> openNativeScreen(String routeName, [Map<String, dynamic>? params]) async {
     try {

@@ -119,7 +119,7 @@ class _OrderConfirmationDialogState extends State<OrderConfirmationDialog> {
                     shape: BoxShape.circle,
                     border: Border.all(color: const Color(0xFFF59E0B), width: 3.5),
                   ),
-                  alignment: Alignment.Center,
+                  alignment: Alignment.center,
                   child: const Text(
                     'i',
                     style: TextStyle(

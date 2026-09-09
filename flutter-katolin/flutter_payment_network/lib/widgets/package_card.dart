@@ -54,7 +54,7 @@ class PackageCardWidget extends StatelessWidget {
                       color: primaryColor.withOpacity(0.15),
                       shape: BoxShape.circle,
                     ),
-                    alignment: Alignment.Center,
+                    alignment: Alignment.center,
                     child: Text(
                       operator.defaultIcon,
                       style: TextStyle(

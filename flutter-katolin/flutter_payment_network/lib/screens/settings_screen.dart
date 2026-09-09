@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 class SettingsScreen extends StatefulWidget {
   final String currentBaseUrl;
+  final String? apiToken;
+  final String? baseUrl;
   final VoidCallback? onLogout;
   final Function(String newUrl)? onBaseUrlChanged;
   final VoidCallback? onBackToMain;
@@ -9,6 +11,8 @@ class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
     Key? key,
     this.currentBaseUrl = 'https://shopik.alattab.site',
+    this.apiToken,
+    this.baseUrl,
     this.onLogout,
     this.onBaseUrlChanged,
     this.onBackToMain,
@@ -33,7 +37,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _urlController = TextEditingController(text: widget.currentBaseUrl);
+    _urlController = TextEditingController(text: widget.baseUrl ?? widget.currentBaseUrl);
   }
 
   @override

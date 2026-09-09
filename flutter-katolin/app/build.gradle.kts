@@ -12,6 +12,7 @@ plugins {
 android {
   namespace = "com.example"
   compileSdk { version = release(36) { minorApiLevel = 1 } }
+  ndkVersion = "27.0.12077973"
 
   defaultConfig {
     applicationId = "com.aistudio.shopik.olmssh"

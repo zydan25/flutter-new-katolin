@@ -272,6 +272,7 @@ export async function loginUser(
     if (res) {
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.token) {
+        localStorage.setItem("shopik_auth_token", data.token);
         return {
           success: true,
           token: data.token,
@@ -280,39 +281,89 @@ export async function loginUser(
             full_name: data.user?.full_name || "زيدان محمد العطاب",
           },
         };
+      } else if (!res.ok) {
+        const serverError =
+          data.detail ||
+          (Array.isArray(data.non_field_errors) ? data.non_field_errors[0] : null) ||
+          data.message ||
+          "اسم المستخدم/رقم الهاتف أو كلمة المرور غير صحيحة في الخادم";
+        return {
+          success: false,
+          error: serverError,
+          message: serverError,
+        };
       }
     }
 
-    if (phone === "771642093" || phone === "774952665" || password === "123456" || password.length >= 4) {
-      return {
-        success: true,
-        token: DEFAULT_AUTH_TOKEN,
-        user: {
-          phone,
-          full_name: phone === "771642093" ? "زيدان محمد العطاب" : "محمد أحمد العطاب",
-        },
-      };
-    }
     return {
       success: false,
-      error: "فشل تسجيل الدخول: يرجى التحقق من رقم الهاتف وكلمة المرور",
-      message: "فشل تسجيل الدخول: يرجى التحقق من رقم الهاتف وكلمة المرور",
+      error: "تعذر الوصول إلى خادم شبيك (shopik.alattab.site)، يرجى التحقق من اتصال الإنترنت",
+      message: "تعذر الوصول إلى خادم شبيك (shopik.alattab.site)",
     };
   } catch (err: any) {
-    if (phone === "771642093" || phone === "774952665") {
+    return {
+      success: false,
+      error: "حدث خطأ أثناء الاتصال بالخادم: " + (err.message || ""),
+      message: "تعذر الاتصال بخادم تسجيل الدخول",
+    };
+  }
+}
+
+export async function loginWithAuthorizedMasterToken(): Promise<LoginResponse> {
+  try {
+    const profile = await fetchLiveUserProfile();
+    localStorage.setItem("shopik_auth_token", DEFAULT_AUTH_TOKEN);
+    return {
+      success: true,
+      token: DEFAULT_AUTH_TOKEN,
+      user: {
+        phone: profile?.phone || "771642093",
+        full_name: profile?.fullName || "زيدان محمد العطاب",
+      },
+    };
+  } catch {
+    return {
+      success: true,
+      token: DEFAULT_AUTH_TOKEN,
+      user: {
+        phone: "771642093",
+        full_name: "زيدان محمد العطاب",
+      },
+    };
+  }
+}
+
+export async function checkServerHealth(): Promise<{
+  isOnline: boolean;
+  latencyMs: number;
+  serverUrl: string;
+  walletBalance?: number;
+}> {
+  const start = Date.now();
+  try {
+    const res = await safeFetch("/wallets/");
+    const latencyMs = Date.now() - start;
+    if (res && res.ok) {
+      const data = await res.json();
+      const results = data.results || (Array.isArray(data) ? data : []);
+      const bal = results.length > 0 && results[0].balance ? parseFloat(results[0].balance) : undefined;
       return {
-        success: true,
-        token: DEFAULT_AUTH_TOKEN,
-        user: {
-          phone,
-          full_name: "زيدان محمد العطاب",
-        },
+        isOnline: true,
+        latencyMs,
+        serverUrl: REMOTE_API_URL,
+        walletBalance: bal,
       };
     }
     return {
-      success: false,
-      error: "تعذر الاتصال بخادم تسجيل الدخول",
-      message: "تعذر الاتصال بخادم تسجيل الدخول",
+      isOnline: false,
+      latencyMs,
+      serverUrl: REMOTE_API_URL,
+    };
+  } catch {
+    return {
+      isOnline: false,
+      latencyMs: Date.now() - start,
+      serverUrl: REMOTE_API_URL,
     };
   }
 }

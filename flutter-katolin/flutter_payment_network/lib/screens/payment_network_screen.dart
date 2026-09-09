@@ -447,7 +447,7 @@ class _PaymentNetworkScreenState extends State<PaymentNetworkScreen> with Single
                     shape: BoxShape.circle,
                     border: Border.all(color: const Color(0xFFF59E0B), width: 3),
                   ),
-                  alignment: Alignment.Center,
+                  alignment: Alignment.center,
                   child: const Text(
                     'i',
                     style: TextStyle(
@@ -911,7 +911,7 @@ class _PaymentNetworkScreenState extends State<PaymentNetworkScreen> with Single
             color: isSelected ? primaryColor : Colors.grey.shade300,
           ),
         ),
-        alignment: Alignment.Center,
+        alignment: Alignment.center,
         child: Text(
           title,
           style: TextStyle(
@@ -1041,7 +1041,7 @@ class _PaymentNetworkScreenState extends State<PaymentNetworkScreen> with Single
     if (_filteredItems.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(32),
-        alignment: Alignment.Center,
+        alignment: Alignment.center,
         child: Column(
           children: [
             Icon(Icons.inbox_rounded, size: 48, color: Colors.grey.shade400),

@@ -77,7 +77,7 @@ class OperatorTabsWidget extends StatelessWidget {
                           : primaryColor.withOpacity(0.12),
                       shape: BoxShape.circle,
                     ),
-                    alignment: Alignment.Center,
+                    alignment: Alignment.center,
                     child: Text(
                       op.defaultIcon,
                       style: TextStyle(

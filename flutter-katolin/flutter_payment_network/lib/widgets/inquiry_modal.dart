@@ -146,7 +146,7 @@ class InquiryResultModal extends StatelessWidget {
     if (data.offers.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(20),
-        alignment: Alignment.Center,
+        alignment: Alignment.center,
         child: Text(
           'لا توجد باقات أو اشتراكات نشطة حالياً لهذا الرقم.',
           style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
@@ -252,7 +252,7 @@ class InquiryResultModal extends StatelessWidget {
     if (entries.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(16),
-        alignment: Alignment.Center,
+        alignment: Alignment.center,
         child: Text(
           data.message ?? 'لا توجد بيانات متاحة للاستعلام.',
           style: TextStyle(color: Colors.grey.shade700),
