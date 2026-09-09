@@ -76,7 +76,7 @@ export const ReportsScreen: React.FC<Props> = ({ onBack }) => {
             { id: "month", label: "هذا الشهر" },
           ].map((item) => (
             <button
-              key={item.id}
+              key={`report-period-${item.id}`}
               onClick={() => setPeriod(item.id as any)}
               className={`flex-1 py-2 rounded-xl transition text-center ${
                 period === item.id
@@ -142,8 +142,8 @@ export const ReportsScreen: React.FC<Props> = ({ onBack }) => {
           </div>
 
           <div className="space-y-2.5">
-            {operatorBreakdown.map((op) => (
-              <div key={op.name} className="space-y-1">
+            {operatorBreakdown.map((op, idx) => (
+              <div key={`report-breakdown-${op.name}-${idx}`} className="space-y-1">
                 <div className="flex justify-between text-xs font-bold">
                   <span className="text-slate-800">{op.name}</span>
                   <span className="text-slate-500">

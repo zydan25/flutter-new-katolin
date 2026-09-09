@@ -63,6 +63,19 @@ export interface StoreProduct {
   isTrending?: boolean;
 }
 
+export interface UserAddress {
+  id: string | number;
+  title?: string;
+  recipientName?: string;
+  governorate?: string;
+  city: string;
+  district?: string;
+  streetDetails: string;
+  phone: string;
+  notes?: string;
+  isDefault?: boolean;
+}
+
 export interface StoreOrder {
   id: number;
   orderNumber: string;
@@ -71,6 +84,8 @@ export interface StoreOrder {
   statusText: string;
   date: string;
   vendorName: string;
+  shippingAddress?: string;
+  canEdit?: boolean;
   items: Array<{
     id: number;
     productName: string;

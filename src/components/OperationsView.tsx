@@ -136,9 +136,9 @@ export const OperationsView: React.FC<Props> = ({
             لا توجد عمليات مطابقة في السجل
           </div>
         ) : (
-          filteredOps.map((op) => (
+          filteredOps.map((op, idx) => (
             <div
-              key={op.id}
+              key={op.id ? `ops-view-${op.id}-${idx}` : `ops-view-${idx}`}
               onClick={() => onSelectOperation(op)}
               className="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm hover:border-[#8B1D3B]/40 transition cursor-pointer active:scale-[0.99] space-y-2"
             >

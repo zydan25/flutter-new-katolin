@@ -1524,9 +1524,9 @@ export default function App() {
 
                   {/* Subscriptions List */}
                   <div className="p-2 space-y-2 bg-[#FFF8F0]">
-                    {activeSubscriptions.map((sub) => (
+                    {activeSubscriptions.map((sub, sIdx) => (
                       <div
-                        key={sub.id}
+                        key={sub.id ? `sub-${sub.id}-${sIdx}` : `sub-${sIdx}`}
                         className="bg-white rounded-xl p-2.5 border border-amber-200/70 shadow-sm flex items-center justify-between gap-2"
                       >
                         {/* Right: Info */}
@@ -1579,10 +1579,10 @@ export default function App() {
                     : currentOp.id === "sabafon"
                     ? sabafonPackages
                     : youPackages
-                ).map(([catTitle, pkgs]) => {
+                ).map(([catTitle, pkgs], cIdx) => {
                   const isExpanded = expandedCategories[catTitle] ?? false;
                   return (
-                    <div key={catTitle} className="rounded-2xl overflow-hidden shadow-sm border border-slate-200 bg-white">
+                    <div key={`accordion-cat-${catTitle}-${cIdx}`} className="rounded-2xl overflow-hidden shadow-sm border border-slate-200 bg-white">
                       {/* Accordion Header */}
                       <button
                         onClick={() => toggleCategory(catTitle)}
@@ -1608,9 +1608,9 @@ export default function App() {
                       {/* Accordion Content: Package Cards Grid */}
                       {isExpanded && (
                         <div className="p-2.5 space-y-3 bg-[#FDFBF7]">
-                          {pkgs.map((pkg) => (
+                          {pkgs.map((pkg, pIdx) => (
                             <div
-                              key={pkg.id}
+                              key={pkg.id ? `pkg-${pkg.id}-${pIdx}` : `pkg-${pIdx}`}
                               onClick={() => openPackageModal(pkg)}
                               className="bg-[#FFF8F0] hover:bg-[#FFF3E0] rounded-2xl p-3 border border-amber-200/90 shadow-sm cursor-pointer transition active:scale-[0.99] relative"
                             >
@@ -2407,7 +2407,7 @@ export default function App() {
                 <div className="grid grid-cols-6 gap-1.5 text-xs font-bold text-slate-800">
                   {["1", "2", "3", "4", "5", "6"].map((n) => (
                     <button
-                      key={n}
+                      key={`keypad-num-${n}`}
                       onClick={() => handleKeypadPress(n)}
                       className="py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-center transition active:scale-95 shadow-sm"
                     >
@@ -2418,7 +2418,7 @@ export default function App() {
                 <div className="grid grid-cols-5 gap-1.5 text-xs font-bold text-slate-800 mt-1.5">
                   {["7", "8", "9", "0", "x"].map((n) => (
                     <button
-                      key={n}
+                      key={`keypad-num-${n}`}
                       onClick={() => handleKeypadPress(n)}
                       className={`py-1.5 rounded-lg text-center transition active:scale-95 shadow-sm ${
                         n === "x" ? "bg-rose-100 text-rose-600" : "bg-slate-100 hover:bg-slate-200"

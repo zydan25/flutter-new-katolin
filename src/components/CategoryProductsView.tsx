@@ -153,11 +153,11 @@ export const CategoryProductsView: React.FC<Props> = ({
 
       {/* Main Categories Tabs matching Screenshot 5 */}
       <div className="bg-white border-b border-slate-100 px-4 py-2 flex gap-2 overflow-x-auto no-scrollbar">
-        {mainCategories.map((cat) => {
+        {mainCategories.map((cat, idx) => {
           const isSelected = selectedMainCat === cat;
           return (
             <button
-              key={cat}
+              key={`mcat-${cat}-${idx}`}
               onClick={() => {
                 setSelectedMainCat(cat);
                 setSelectedSubCat("الكل");
@@ -176,11 +176,11 @@ export const CategoryProductsView: React.FC<Props> = ({
 
       {/* Subcategory Chips matching Screenshot 5 */}
       <div className="bg-white border-b border-slate-100 px-4 py-2 flex gap-2 overflow-x-auto no-scrollbar">
-        {subCategories.map((sub) => {
+        {subCategories.map((sub, idx) => {
           const isSelected = selectedSubCat === sub;
           return (
             <button
-              key={sub}
+              key={`subcat-${sub}-${idx}`}
               onClick={() => setSelectedSubCat(sub)}
               className={`px-3 py-1 rounded-lg text-xs font-bold shrink-0 transition border ${
                 isSelected
@@ -212,12 +212,12 @@ export const CategoryProductsView: React.FC<Props> = ({
 
         {/* Product Grid matching Screenshot 5 */}
         <div className="grid grid-cols-2 gap-3.5 mt-4">
-          {filteredProducts.map((p) => {
+          {filteredProducts.map((p, idx) => {
             const isFav = favorites.includes(p.id);
 
             return (
               <div
-                key={p.id}
+                key={p.id ? `cat-prod-${p.id}-${idx}` : `cat-prod-${idx}`}
                 onClick={() => onSelectProduct(p)}
                 className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col justify-between hover:shadow-md transition cursor-pointer group"
               >

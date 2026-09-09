@@ -181,11 +181,11 @@ export const StoreProfileView: React.FC<Props> = ({
 
         {/* Filter Tabs */}
         <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
-          {tabs.map((tab) => {
+          {tabs.map((tab, idx) => {
             const isSel = activeTab === tab;
             return (
               <button
-                key={tab}
+                key={`store-tab-${tab}-${idx}`}
                 onClick={() => setActiveTab(tab)}
                 className={`px-4 py-2 rounded-xl text-xs font-black shrink-0 transition ${
                   isSel
@@ -207,9 +207,9 @@ export const StoreProfileView: React.FC<Props> = ({
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            {storeProducts.map((p) => (
+            {storeProducts.map((p, idx) => (
               <div
-                key={p.id}
+                key={p.id ? `store-prof-prod-${p.id}-${idx}` : `store-prof-prod-${idx}`}
                 onClick={() => onSelectProduct(p)}
                 className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col justify-between hover:shadow-md transition cursor-pointer"
               >

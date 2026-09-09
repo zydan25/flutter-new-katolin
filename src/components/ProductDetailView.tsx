@@ -112,7 +112,7 @@ export const ProductDetailView: React.FC<Props> = ({
           <div className="flex items-center justify-center gap-2 pt-1">
             {images.map((_, idx) => (
               <button
-                key={idx}
+                key={`pdetail-img-${idx}`}
                 onClick={() => setSelectedImgIndex(idx)}
                 className={`w-8 h-8 rounded-lg text-xs font-black transition border ${
                   selectedImgIndex === idx
@@ -188,9 +188,9 @@ export const ProductDetailView: React.FC<Props> = ({
               الألوان المتاحة : ({selectedColor})
             </div>
             <div className="flex gap-2">
-              {colors.map((c) => (
+              {colors.map((c, idx) => (
                 <button
-                  key={c}
+                  key={`pdetail-color-${c}-${idx}`}
                   onClick={() => setSelectedColor(c)}
                   className={`px-3 py-1 rounded-lg text-xs font-bold transition border ${
                     selectedColor === c
@@ -210,9 +210,9 @@ export const ProductDetailView: React.FC<Props> = ({
               المقاسات والخيارات المتاحة :
             </div>
             <div className="flex gap-2">
-              {sizes.map((s) => (
+              {sizes.map((s, idx) => (
                 <button
-                  key={s}
+                  key={`pdetail-size-${s}-${idx}`}
                   onClick={() => setSelectedSize(s)}
                   className={`w-9 h-9 rounded-lg text-xs font-black transition border flex items-center justify-center ${
                     selectedSize === s

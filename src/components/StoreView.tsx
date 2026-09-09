@@ -448,7 +448,7 @@ export const StoreView: React.FC<Props> = ({
         <div className="relative rounded-2xl overflow-hidden shadow-sm">
           {banners.map((b, idx) => (
             <div
-              key={b.id}
+              key={`store-banner-${b.id || idx}`}
               className={`bg-gradient-to-r ${b.bgColor} text-white p-4 rounded-2xl ${
                 idx === 0 ? "block" : "hidden"
               }`}
@@ -492,9 +492,9 @@ export const StoreView: React.FC<Props> = ({
           </div>
 
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-            {categories.map((cat) => (
+            {categories.map((cat, idx) => (
               <button
-                key={cat.id}
+                key={`store-cat-${cat.id || idx}`}
                 onClick={() => {
                   if (cat.id !== "all") {
                     setActiveCategoryView(cat.name);
@@ -530,9 +530,9 @@ export const StoreView: React.FC<Props> = ({
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            {vendors.map((v) => (
+            {vendors.map((v, idx) => (
               <div
-                key={v.id}
+                key={`store-vendor-${v.id || idx}`}
                 onClick={() => setActiveStoreView(v.name.replace("متجر ", ""))}
                 className="bg-white border border-slate-200 p-2.5 rounded-2xl flex items-center justify-between cursor-pointer hover:border-[#8B1D3B] transition active:scale-98 shadow-2xs"
               >
@@ -584,11 +584,11 @@ export const StoreView: React.FC<Props> = ({
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
-              {filteredProducts.map((product) => {
+              {filteredProducts.map((product, idx) => {
                 const isFav = favorites.includes(product.id);
                 return (
                   <div
-                    key={product.id}
+                    key={product.id ? `store-prod-${product.id}-${idx}` : `store-prod-${idx}`}
                     className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-md transition flex flex-col justify-between group"
                   >
                     {/* Image & Badges */}
@@ -870,9 +870,9 @@ export const StoreView: React.FC<Props> = ({
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-2.5">
-              {orders.map((ord) => (
+              {orders.map((ord, idx) => (
                 <div
-                  key={ord.id}
+                  key={ord.id ? `store-ord-${ord.id}-${idx}` : `store-ord-${idx}`}
                   onClick={() => {
                     setIsOrdersOpen(false);
                     setActiveDetailOrder(ord);
@@ -890,8 +890,8 @@ export const StoreView: React.FC<Props> = ({
                   </div>
 
                   <div className="space-y-1">
-                    {ord.items.map((it, idx) => (
-                      <div key={idx} className="flex justify-between text-xs text-slate-600">
+                    {ord.items.map((it, itIdx) => (
+                      <div key={`ord-item-${it.id || itIdx}-${itIdx}`} className="flex justify-between text-xs text-slate-600">
                         <span>• {it.productName} (x{it.quantity})</span>
                         <span className="font-bold">{it.price.toLocaleString()} ر.ي</span>
                       </div>
@@ -1145,11 +1145,11 @@ export const AddressesScreen: React.FC<AddressesScreenProps> = ({
           </div>
         ) : (
           <div className="space-y-3">
-            {addresses.map((addr) => {
+            {addresses.map((addr, idx) => {
               const isSelected = selectedAddressId === addr.id;
               return (
                 <div
-                  key={addr.id}
+                  key={addr.id ? `store-addr-${addr.id}-${idx}` : `store-addr-${idx}`}
                   className={`bg-white rounded-2xl p-4 border transition ${
                     isSelected
                       ? "border-[#8B1D3B] ring-2 ring-[#8B1D3B]/20 shadow-sm"

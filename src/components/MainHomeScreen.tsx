@@ -457,11 +457,11 @@ export const MainHomeScreen: React.FC<Props> = ({
           </div>
 
           <div className="grid grid-cols-2 gap-2.5">
-            {servicesGrid.map((item) => {
+            {servicesGrid.map((item, idx) => {
               const Icon = item.icon;
               return (
                 <div
-                  key={item.id}
+                  key={`home-svc-${item.id || idx}`}
                   onClick={() => onNavigate(item.id)}
                   className="bg-white hover:bg-slate-50 border border-slate-200/90 rounded-2xl p-3 shadow-xs hover:shadow transition-all cursor-pointer flex flex-col justify-between h-[108px] relative active:scale-[0.98]"
                 >
@@ -507,9 +507,9 @@ export const MainHomeScreen: React.FC<Props> = ({
           </div>
 
           <div className="space-y-2">
-            {operations.slice(0, 4).map((op) => (
+            {operations.slice(0, 4).map((op, idx) => (
               <div
-                key={op.id}
+                key={op.id ? `home-op-${op.id}-${idx}` : `home-op-${idx}`}
                 onClick={() => onSelectOperation(op)}
                 className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between gap-3 cursor-pointer hover:bg-slate-50 transition active:scale-[0.99]"
               >

@@ -39,12 +39,13 @@ async function safeFetch(endpoint: string, options: RequestInit = {}): Promise<R
     ...(options.headers as Record<string, string> || {}),
   };
 
-  // Check if we are running in a local Vite development server with proxy configured
-  const isLocalDevWithProxy = typeof window !== "undefined" && 
-    window.location.hostname === "localhost" && 
-    window.location.port === "3000";
+  // In Web browsers (preview or dev), ALWAYS call the Vite server proxy (/api) first
+  // to avoid CORS errors when connecting to the Django remote backend.
+  const isBrowserWeb = typeof window !== "undefined" && 
+    !window.location.protocol.startsWith("file") && 
+    !window.location.protocol.startsWith("capacitor");
 
-  if (isLocalDevWithProxy) {
+  if (isBrowserWeb) {
     try {
       const res = await fetch(localUrl, {
         ...options,
@@ -54,11 +55,11 @@ async function safeFetch(endpoint: string, options: RequestInit = {}): Promise<R
         return res;
       }
     } catch {
-      // Local fetch failed, proceed to direct remote
+      // Local proxy not available or failed, try direct remote
     }
   }
 
-  // 1. Direct call to remote backend server (Primary for APK & Deployed environments)
+  // Direct call to remote backend server (for APKs, mobile apps, or fallback)
   try {
     const res = await fetch(remoteUrl, {
       ...options,
@@ -72,8 +73,8 @@ async function safeFetch(endpoint: string, options: RequestInit = {}): Promise<R
     console.warn("Direct connection to remote API failed:", err);
   }
 
-  // 2. Secondary fallback attempt to local proxy if not previously attempted
-  if (!isLocalDevWithProxy) {
+  // Final fallback to local URL if not already tried
+  if (!isBrowserWeb) {
     try {
       const res = await fetch(localUrl, {
         ...options,
@@ -83,7 +84,7 @@ async function safeFetch(endpoint: string, options: RequestInit = {}): Promise<R
         return res;
       }
     } catch {
-      // Both attempts failed
+      // Failed
     }
   }
 

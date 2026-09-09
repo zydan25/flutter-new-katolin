@@ -129,7 +129,7 @@ export const OrdersDetailView: React.FC<Props> = ({
               const isLast = idx === steps.length - 1;
 
               return (
-                <div key={st.step} className="flex items-start gap-3 relative">
+                <div key={`track-step-${st.step}-${idx}`} className="flex items-start gap-3 relative">
                   {/* Step circle indicator */}
                   <div className="flex flex-col items-center">
                     <div
@@ -233,7 +233,7 @@ export const OrdersDetailView: React.FC<Props> = ({
           <div className="space-y-2.5">
             {order.items.map((item, idx) => (
               <div
-                key={idx}
+                key={item.id ? `ord-item-${item.id}-${idx}` : `ord-item-${idx}`}
                 className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5"
               >
                 <div className="flex justify-between items-start">
@@ -321,7 +321,7 @@ export const OrdersDetailView: React.FC<Props> = ({
           <div className="flex items-center gap-1 justify-center py-2">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
-                key={star}
+                key={`rating-star-${star}`}
                 type="button"
                 onClick={() => setUserRating(star)}
                 className="p-1 hover:scale-110 transition"
@@ -389,7 +389,7 @@ export const OrdersDetailView: React.FC<Props> = ({
             <div className="flex-1 overflow-y-auto p-3 space-y-2">
               {chatMessages.map((msg, i) => (
                 <div
-                  key={i}
+                  key={`chat-msg-${msg.time}-${i}`}
                   className={`flex flex-col ${
                     msg.sender === "user" ? "items-start" : "items-end"
                   }`}

@@ -134,11 +134,11 @@ export const AccountStatementScreen: React.FC<Props> = ({
 
       {/* Ledger List */}
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
-        {filteredEntries.map((entry) => {
+        {filteredEntries.map((entry, idx) => {
           const isDeposit = entry.credit > 0;
           return (
             <div
-              key={entry.id}
+              key={entry.id ? `stmt-entry-${entry.id}-${idx}` : `stmt-entry-${idx}`}
               className="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm space-y-1.5"
             >
               <div className="flex items-center justify-between">

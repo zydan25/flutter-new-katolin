@@ -472,9 +472,9 @@ export const WifiNetworksScreen: React.FC<Props> = ({
               </div>
             ) : (
               <div className="space-y-3">
-                {filteredNetworks.map((net) => (
+                {filteredNetworks.map((net, nIdx) => (
                   <div
-                    key={net.id}
+                    key={net.id ? `wifi-net-${net.id}-${nIdx}` : `wifi-net-${nIdx}`}
                     className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs space-y-3 hover:border-slate-300 transition"
                   >
                     <div className="flex items-start justify-between">
@@ -516,11 +516,11 @@ export const WifiNetworksScreen: React.FC<Props> = ({
                         اختر فئة الكرت لشرائه مباشرة:
                       </div>
                       <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                        {(net.denominations || []).map((denom) => {
+                        {(net.denominations || []).map((denom, dIdx) => {
                           const priceVal = parseFloat(denom.sale_price) || parseFloat(denom.face_value) || 100;
                           return (
                             <button
-                              key={denom.id}
+                              key={`net-${net.id || nIdx}-denom-${denom.id || dIdx}`}
                               disabled={isPurchasing}
                               onClick={() => handleOpenConfirm(net, denom)}
                               className="bg-slate-50 hover:bg-[#8B1D3B] hover:text-white border border-slate-200 py-2.5 px-2 rounded-xl text-center transition active:scale-95 group flex flex-col items-center justify-between shadow-xs"
@@ -577,9 +577,9 @@ export const WifiNetworksScreen: React.FC<Props> = ({
               </div>
             ) : (
               <div className="space-y-3">
-                {filteredHistory.map((card) => (
+                {filteredHistory.map((card, cIdx) => (
                   <div
-                    key={card.id}
+                    key={card.id ? `wifi-card-${card.id}-${cIdx}` : `wifi-card-${cIdx}`}
                     className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs space-y-3"
                   >
                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">

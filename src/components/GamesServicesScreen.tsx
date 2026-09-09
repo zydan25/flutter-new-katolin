@@ -173,11 +173,11 @@ export const GamesServicesScreen: React.FC<Props> = ({
                   اختر الباقة المطلوبة
                 </label>
                 <div className="space-y-1.5">
-                  {selectedGame.packages.map((pkg: any) => {
+                  {selectedGame.packages.map((pkg: any, idx: number) => {
                     const isSelected = selectedPackage?.id === pkg.id;
                     return (
                       <div
-                        key={pkg.id}
+                        key={`game-${selectedGame.id}-pkg-${pkg.id || idx}-${idx}`}
                         onClick={() => setSelectedPackage(pkg)}
                         className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition ${
                           isSelected
@@ -208,9 +208,9 @@ export const GamesServicesScreen: React.FC<Props> = ({
             <div className="text-xs font-black text-slate-800 mb-1">
               اختر اللعبة أو المنصة
             </div>
-            {games.map((g) => (
+            {games.map((g, idx) => (
               <div
-                key={g.id}
+                key={`game-platform-${g.id || idx}`}
                 onClick={() => setSelectedGame(g)}
                 className="bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl p-3.5 shadow-sm flex items-center justify-between cursor-pointer transition active:scale-[0.99]"
               >
