@@ -1070,8 +1070,8 @@ class _PaymentNetworkScreenState extends State<PaymentNetworkScreen> with Single
               context: context,
               package: item,
               operator: _currentOperator,
-              currentBalance: _lastInquiryResult?.balance ?? 436.04,
-              loanAmount: _lastInquiryResult?.loanAmount ?? 122.0,
+              currentBalance: double.tryParse(_lastInquiryResult?.balance?.toString() ?? '') ?? 436.04,
+              loanAmount: double.tryParse(_lastInquiryResult?.loanAmount?.toString() ?? '') ?? 122.0,
               onProceedPayment: (totalAmount, includeLoan) {
                 _initiateRecharge(
                   packageName: item.name,
@@ -1089,8 +1089,9 @@ class _PaymentNetworkScreenState extends State<PaymentNetworkScreen> with Single
   Widget _buildPackagesTopInquiryRow(Color primaryColor) {
     final balanceVal = _lastInquiryResult?.balance?.toString() ?? '436.04';
     final lineTypeVal = _lastInquiryResult?.mobileType ?? 'دفع مسبق | شريحة';
-    final hasLoan = _lastInquiryResult?.loanAmount != null && _lastInquiryResult!.loanAmount! > 0;
-    final loanVal = hasLoan ? '${_lastInquiryResult!.loanAmount} ر.ي' : '122.0 ر.ي';
+    final loanNum = double.tryParse(_lastInquiryResult?.loanAmount?.toString() ?? '') ?? 0.0;
+    final hasLoan = loanNum > 0;
+    final loanVal = hasLoan ? '$loanNum ر.ي' : '122.0 ر.ي';
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),

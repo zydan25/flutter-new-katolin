@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 
 class WifiNetworksScreen extends StatefulWidget {
@@ -345,7 +346,8 @@ class _WifiNetworksScreenState extends State<WifiNetworksScreen> with SingleTick
   }
 
   void _showPurchaseSuccessDialog(String netName, String denomName, int quantity, double total, String phone) {
-    final cardCode = 'WF-${(10000000..99999999).random()}';
+    final randNum = 10000000 + Random().nextInt(90000000);
+    final cardCode = 'WF-$randNum';
     showDialog(
       context: context,
       builder: (ctx) => Directionality(

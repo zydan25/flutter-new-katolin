@@ -118,7 +118,7 @@ class PackageCardWidget extends StatelessWidget {
                     _buildBadge(
                       icon: Icons.call_rounded,
                       text: '${package.minutes} دقيقة',
-                      color: Colors.emeraldPrimary,
+                      color: const Color(0xFF059669),
                     ),
                   if (package.sms != null)
                     _buildBadge(

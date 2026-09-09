@@ -240,8 +240,10 @@ class _AccountStatementScreenState extends State<AccountStatementScreen> {
             // Bottom Summary Card
             Container(
               padding: const EdgeInsets.all(12),
-              color: Colors.white,
-              border: Border(top: BorderSide(color: Colors.grey.shade300)),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(top: BorderSide(color: Colors.grey.shade300)),
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: const [
