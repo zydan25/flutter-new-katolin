@@ -42,7 +42,7 @@ class _ShopikAppState extends State<ShopikApp> {
       ),
     ),
     builder: (context, child) => Directionality(textDirection: TextDirection.rtl, child: child ?? const SizedBox.shrink()),
-    home: booting ? const _Splash() : Consumer<AppController>(builder: (_, app, __) => app.isLoggedIn ? const HomeShell() : const LoginScreen()),
+    home: booting ? const _Splash() : Consumer<AppController>(builder: (_, app, __) => app.isLoggedIn ? const HomeShell() : const ShopikLoginScreen()),
   );
 }
 
