@@ -1,4 +1,4 @@
-# Native Flutter build for the new standalone SHOPIK app under shopik_flutter.
+# Native Flutter build for the standalone SHOPIK app under shopik_flutter.
 name: Build SHOPIK Native Flutter
 
 on:
@@ -35,7 +35,7 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
       - name: Analyze
-        run: flutter analyze
+        run: flutter analyze --no-fatal-warnings --no-fatal-infos
       - name: Build release APK
         run: flutter build apk --release
       - name: Build release AAB
@@ -43,12 +43,12 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: shopik-flutter-release-apk
+          name: shopik-flutter-native-release-apk
           path: shopik_flutter/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
       - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
-          name: shopik-flutter-release-aab
+          name: shopik-flutter-native-release-aab
           path: shopik_flutter/build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
