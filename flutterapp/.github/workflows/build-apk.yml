@@ -1,0 +1,81 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-native:
+    name: Build Native Android & Flutter APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android NDK 27
+        run: |
+          yes | sdkmanager --licenses || true
+          sdkmanager "ndk;27.0.12077973"
+
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.0'
+          channel: 'stable'
+
+      - name: Setup Gradle 8.10.2
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+
+      - name: Get Flutter Dependencies
+        run: |
+          cd flutter-katolin/flutter_payment_network
+          flutter pub get
+
+      - name: Build Standalone Flutter APK
+        run: |
+          cd flutter-katolin/flutter_payment_network
+          flutter build apk --debug
+
+      - name: Build Kotlin Native Host APK
+        run: |
+          cd flutter-katolin
+          gradle wrapper --gradle-version 8.10.2
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon -x test
+        continue-on-error: true
+
+      - name: Upload Native Flutter APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: shopik-flutter-native-debug-apk
+          path: |
+            flutter-katolin/flutter_payment_network/build/app/outputs/flutter-apk/*.apk
+            flutter-katolin/flutter_payment_network/build/host/outputs/apk/release/*.apk
+            flutter-katolin/flutter_payment_network/build/host/outputs/apk/debug/*.apk
+            flutter-katolin/flutter_payment_network/.android/Flutter/build/outputs/apk/**/*.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Native Android Kotlin APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: shopik-kotlin-compose-debug-apk
+          path: flutter-katolin/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: warn
+          retention-days: 14
+
