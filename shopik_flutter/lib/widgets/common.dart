@@ -2,52 +2,159 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   static const burgundy = Color(0xFF8B1D3B);
-  static const cyan = Color(0xFF26C6DA);
-  static const orange = Color(0xFFFED7AA);
-  static const amber = Color(0xFFF59E0B);
+  static const burgundyDark = Color(0xFF78142F);
+  static const burgundyLight = Color(0xFF9E1F3D);
+  static const emerald = Color(0xFF059669);
   static const blue = Color(0xFF0284C7);
-  static const indigo = Color(0xFF283593);
-  static const page = Color(0xFFF4F6F9);
+  static const indigo = Color(0xFF4F46E5);
+  static const teal = Color(0xFF0F766E);
+  static const amber = Color(0xFFF59E0B);
+  static const purple = Color(0xFF7C3AED);
+  static const page = Color(0xFFF7F9FC);
+  static const border = Color(0xFFE2E8F0);
+  static const muted = Color(0xFF64748B);
 }
 
 class PageCard extends StatelessWidget {
-  const PageCard({super.key, required this.child, this.padding = const EdgeInsets.all(12)});
-  final Widget child; final EdgeInsets padding;
-  @override Widget build(BuildContext context) => Container(
-    width: double.infinity, padding: padding,
-    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: const Color(0xFFE2E8F0)), boxShadow: const [BoxShadow(blurRadius: 8, color: Color(0x11000000), offset: Offset(0, 2))]),
-    child: child,
-  );
-}
+  const PageCard({super.key, required this.child, this.padding = const EdgeInsets.all(12), this.margin});
 
-class SectionHeader extends StatelessWidget {
-  const SectionHeader({super.key, required this.title, this.color = AppColors.burgundy});
-  final String title; final Color color;
-  @override Widget build(BuildContext context) => Container(
-    width: double.infinity, padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 12),
-    decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(14)),
-    child: Text(title, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 13)),
-  );
-}
+  final Widget child;
+  final EdgeInsets padding;
+  final EdgeInsetsGeometry? margin;
 
-class BusyOverlay extends StatelessWidget {
-  const BusyOverlay({super.key, required this.visible, this.text = 'الرجاء الإنتظار قليلاً...'});
-  final bool visible; final String text;
-  @override Widget build(BuildContext context) {
-    if (!visible) return const SizedBox.shrink();
-    return Positioned.fill(child: Container(color: Colors.black54, child: Center(child: Container(width: 220, padding: const EdgeInsets.all(22), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)), child: Column(mainAxisSize: MainAxisSize.min, children: [const CircularProgressIndicator(strokeWidth: 3), const SizedBox(height: 16), Text(text, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13))]))));
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: margin,
+      padding: padding,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.border),
+        boxShadow: const [
+          BoxShadow(color: Color(0x100F172A), blurRadius: 12, offset: Offset(0, 4)),
+        ],
+      ),
+      child: child,
+    );
   }
 }
 
-class AmountDialog extends StatelessWidget {
-  const AmountDialog({super.key, required this.title, required this.amount, required this.phone, required this.onConfirm});
-  final String title, amount, phone; final VoidCallback onConfirm;
-  @override Widget build(BuildContext context) => AlertDialog(
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-    title: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.info_outline, color: AppColors.amber), SizedBox(width: 8), Text('تأكيد الطلب', style: TextStyle(fontWeight: FontWeight.w900))]),
-    content: Column(mainAxisSize: MainAxisSize.min, children: [Text(title, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w800)), const SizedBox(height: 12), _row('رقم الهاتف', phone), _row('المبلغ', '$amount ر.ي')]),
-    actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('إلغاء')), ElevatedButton(onPressed: onConfirm, child: const Text('موافق'))],
-  );
+class SectionHeader extends StatelessWidget {
+  const SectionHeader({super.key, required this.title, this.color = AppColors.burgundy, this.icon});
+
+  final String title;
+  final Color color;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        if (icon != null)
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(color: color.withOpacity(.10), borderRadius: BorderRadius.circular(9)),
+            child: Icon(icon, color: color, size: 16),
+          ),
+        if (icon != null) const SizedBox(width: 8),
+        Expanded(
+          child: Text(title, textAlign: TextAlign.right, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF0F172A))),
+        ),
+      ],
+    );
+  }
 }
 
-Widget _row(String a, String b) => Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(a, style: const TextStyle(color: Colors.black54)), Flexible(child: Text(b, style: const TextStyle(fontWeight: FontWeight.w800), textAlign: TextAlign.end))]));
+class StatusBadge extends StatelessWidget {
+  const StatusBadge({super.key, required this.text, this.color = AppColors.emerald});
+
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      decoration: BoxDecoration(color: color.withOpacity(.10), borderRadius: BorderRadius.circular(9), border: Border.all(color: color.withOpacity(.18))),
+      child: Text(text, style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: color)),
+    );
+  }
+}
+
+class EmptyState extends StatelessWidget {
+  const EmptyState({super.key, required this.text, this.icon = Icons.inbox_outlined});
+
+  final String text;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return PageCard(
+      child: Column(
+        children: [
+          Icon(icon, size: 36, color: Colors.black26),
+          const SizedBox(height: 8),
+          Text(text, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.muted, fontSize: 11, fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+}
+
+class BusyOverlay extends StatelessWidget {
+  const BusyOverlay({super.key, required this.visible, this.text = 'جاري تنفيذ الطلب...'});
+
+  final bool visible;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!visible) return const SizedBox.shrink();
+    return Positioned.fill(
+      child: Container(
+        color: Colors.black.withOpacity(.45),
+        child: Center(
+          child: Container(
+            width: 245,
+            padding: const EdgeInsets.all(22),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(strokeWidth: 3, color: AppColors.burgundy),
+                const SizedBox(height: 16),
+                Text(text, textAlign: TextAlign.center, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+String money(dynamic value, [String currency = 'ر.ي']) {
+  final n = num.tryParse('$value');
+  if (n == null) return '$value $currency';
+  return '${n.toStringAsFixed(n.truncateToDouble() == n ? 0 : 2)} $currency';
+}
+
+String absoluteUrl(String? value) {
+  if (value == null || value.isEmpty) return '';
+  if (value.startsWith('http://') || value.startsWith('https://')) return value;
+  return 'https://shopik.alattab.site${value.startsWith('/') ? value : '/$value'}';
+}
+
+Color serviceColor(String key) {
+  final v = key.toLowerCase();
+  if (v.contains('yemen_mobile') || v.contains('يمن موبايل')) return AppColors.burgundy;
+  if (v.contains('sabafon') || v.contains('سبأفون')) return AppColors.blue;
+  if (v.contains('you') || v.contains('يو')) return AppColors.amber;
+  if (v.contains('4g') || v.contains('فورجي')) return const Color(0xFF0EA5E9);
+  if (v.contains('net') || v.contains('نت')) return AppColors.indigo;
+  if (v.contains('game') || v.contains('لعبة')) return AppColors.purple;
+  return AppColors.teal;
+}
