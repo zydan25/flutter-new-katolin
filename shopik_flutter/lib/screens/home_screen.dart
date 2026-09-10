@@ -6,13 +6,18 @@ import 'reports_screen.dart';
 import 'transfer_screen.dart';
 import 'wifi_screen.dart';
 import 'orders_screen.dart';
+import 'store_screen.dart';
+import 'payment_screen.dart';
+import 'operations_screen.dart';
+import 'account_screen.dart';
 
 class HomeScreen extends StatefulWidget { const HomeScreen({super.key}); @override State<HomeScreen> createState() => _HomeScreenState(); }
 class _HomeScreenState extends State<HomeScreen> {
   bool showBalance = false;
   @override Widget build(BuildContext context) {
     final app = context.watch<AppController>();
-    final tiles = [
+    final firstLetter = app.user?.name.isNotEmpty == true ? app.user!.name.substring(0,1) : 'ز';
+    final tiles = <List<dynamic>>[
       ['متجر شبيك (سوق بلس)', 'المنتجات والسلة والطلبات', Icons.shopping_bag, Colors.green, const StoreShortcut()],
       ['شبكة السداد', 'يمن موبايل، YOU، سبأفون، 4G، نت', Icons.credit_card, AppColors.burgundy, const PaymentShortcut()],
       ['سجل العمليات', '${app.operations.length} عملية من الخادم', Icons.history, AppColors.blue, const OperationsShortcut()],
@@ -23,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ['الطلبات', '${app.orders.length} طلبات متجر', Icons.local_shipping, Colors.deepOrange, const OrdersScreen()],
     ];
     return RefreshIndicator(onRefresh: app.refreshAll, child: ListView(padding: const EdgeInsets.fromLTRB(14, 12, 14, 24), children: [
-      Row(children: [CircleAvatar(radius: 22, backgroundColor: AppColors.burgundy, child: Text(app.user?.name.isNotEmpty == true ? app.user!.name.characters.first : 'ز', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900))), const SizedBox(width: 10), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('تطبيق شبيك وسوق بلس', style: TextStyle(color: Colors.black54, fontSize: 11)), Text(app.user?.name ?? 'حسابي الرقمي', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15))])), IconButton(onPressed: () => app.refreshWalletAndReports(), icon: const Icon(Icons.refresh))]),
+      Row(children: [CircleAvatar(radius: 22, backgroundColor: AppColors.burgundy, child: Text(firstLetter, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900))), const SizedBox(width: 10), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('تطبيق شبيك وسوق بلس', style: TextStyle(color: Colors.black54, fontSize: 11)), Text(app.user?.name ?? 'حسابي الرقمي', overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15))])), IconButton(onPressed: () => app.refreshWalletAndReports(), icon: const Icon(Icons.refresh))]),
       const SizedBox(height: 12),
       PageCard(child: Column(children: [Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text('رصيدي', style: TextStyle(fontWeight: FontWeight.w700)), IconButton(onPressed: () => setState(() => showBalance = !showBalance), icon: Icon(showBalance ? Icons.visibility : Icons.visibility_off))]), const SizedBox(height: 4), Text(showBalance ? '${app.walletBalance.toStringAsFixed(2)} ر.ي' : '••••••••', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 28, color: AppColors.burgundy)), const SizedBox(height: 8), Align(alignment: Alignment.centerRight, child: Text('${app.user?.phone ?? ''}  •  ${app.user?.governorate ?? ''}', style: const TextStyle(fontSize: 11, color: Colors.black54)))])),
       const SizedBox(height: 12),
@@ -33,9 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ]));
   }
 }
-
 class _Tile extends StatelessWidget { const _Tile({required this.title, required this.subtitle, required this.icon, required this.color, required this.child}); final String title, subtitle; final IconData icon; final Color color; final Widget child; @override Widget build(BuildContext context) => InkWell(onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => child)), borderRadius: BorderRadius.circular(17), child: Container(padding: const EdgeInsets.all(11), decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(17), boxShadow: const [BoxShadow(blurRadius: 8, color: Color(0x14000000))]), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Container(width: 34, height: 34, decoration: BoxDecoration(color: Colors.white.withOpacity(.18), borderRadius: BorderRadius.circular(11)), child: Icon(icon, color: Colors.white, size: 20)), const Spacer(), Text(title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 12)), const SizedBox(height: 3), Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.white.withOpacity(.88), fontSize: 9.5))])); }
-
 class StoreShortcut extends StatelessWidget { const StoreShortcut({super.key}); @override Widget build(BuildContext context) => const StoreScreen(); }
 class PaymentShortcut extends StatelessWidget { const PaymentShortcut({super.key}); @override Widget build(BuildContext context) => const PaymentScreen(); }
 class OperationsShortcut extends StatelessWidget { const OperationsShortcut({super.key}); @override Widget build(BuildContext context) => const OperationsScreen(); }
