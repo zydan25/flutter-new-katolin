@@ -1,0 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../core/app_controller.dart';
+import '../widgets/common.dart';
+class NotificationsScreen extends StatelessWidget{const NotificationsScreen({super.key});@override Widget build(BuildContext context){final app=context.watch<AppController>();return Scaffold(appBar:AppBar(title:const Text('الإشعارات')),body:ListView(padding:const EdgeInsets.all(12),children:[if(app.notifications.isEmpty)const PageCard(child:Text('لا توجد إشعارات من الخادم.',textAlign:TextAlign.center)) else ...app.notifications.map((n)=>Padding(padding:const EdgeInsets.only(bottom:8),child:PageCard(child:ListTile(contentPadding:EdgeInsets.zero,leading:const Icon(Icons.notifications_active_outlined,color:AppColors.burgundy),title:Text('${n['title']??'إشعار'}',style:const TextStyle(fontWeight:FontWeight.w900,fontSize:12)),subtitle:Text('${n['body']??n['message']??''}',style:const TextStyle(fontSize:10)),trailing:Text('${n['created_at']??''}',style:const TextStyle(fontSize:8))))))]));}}
