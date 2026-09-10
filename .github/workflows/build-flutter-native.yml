@@ -1,3 +1,4 @@
+# Native Flutter build for the new standalone SHOPIK app under shopik_flutter.
 name: Build SHOPIK Native Flutter
 
 on:
