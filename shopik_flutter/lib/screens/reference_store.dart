@@ -76,7 +76,7 @@ class _StoreViewState extends State<StoreView> {
                   onFavorite: () => setState(() => fav ? favorites.remove(p.id) : favorites.add(p.id)),
                   onAdd: () => setState(() => cart[p.id] = qty + 1),
                   onRemove: qty == 0 ? null : () => setState(() => qty <= 1 ? cart.remove(p.id) : cart[p.id] = qty - 1),
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ProductDetailView(product: p, onAdd: () => setState(() => cart[p.id] = qty + 1))),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ProductDetailView(product: p, onAdd: () => setState(() => cart[p.id] = qty + 1)))),
                 );
               },
             ),
@@ -189,9 +189,80 @@ class OrdersDetailView extends StatelessWidget {
 }
 
 class OrderDetailScreen extends StatelessWidget {
-  const OrderDetailScreen({super.key,required this.orderId}); final int orderId;
-  @override Widget build(BuildContext context)=>FutureBuilder<Map<String,dynamic>>(future:context.read<AppController>().api.orderDetail(orderId),builder:(context,s){if(s.connectionState!=ConnectionState.done)return const Scaffold(body:Center(child:CircularProgressIndicator(color:AppColors.blue)));final d=s.data??{};return ScreenFrame(title:'تفاصيل الطلب',color:AppColors.blue,child:ListView(padding:const EdgeInsets.all(12),children:[PageCard(child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[Text('الطلب #${d['order_number']??orderId}',style:const TextStyle(fontSize:17,fontWeight:FontWeight.w900)),Text('${d['status']??''}',style:const TextStyle(fontSize:10,color:AppColors.muted)),const Divider(height:20),for(final key in ['subtotal','shipping_cost','tax','total'])if(d[key]!=null)Row(mainAxisAlignment:MainAxisAlignment.spaceBetween,children:[Text(key,style:const TextStyle(fontSize:9,color:AppColors.muted)),Text('${d[key]} ${d['currency']??'YER'}',style:const TextStyle(fontSize:10,fontWeight:FontWeight.w900))])])),const SizedBox(height:9),Row(children:[Expanded(child:OutlinedButton.icon(onPressed:()=>Navigator.push(context,MaterialPageRoute(builder:(_)=>OrderChatScreen(orderId:orderId))),icon:const Icon(Icons.chat_bubble_outline_rounded),label:const Text('محادثة'))),const SizedBox(width:7),Expanded(child:FilledButton.icon(onPressed:()=>_confirm(context),style:FilledButton.styleFrom(backgroundColor:AppColors.emerald),icon:const Icon(Icons.check_circle_outline),label:const Text('استلام')))] )]));});
-  Future<void> _confirm(BuildContext context) async { try { await context.read<AppController>().api.confirmReceived(orderId); await context.read<AppController>().refreshAll(); if(context.mounted)ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('تم تأكيد الاستلام.'))); } catch(e) { if(context.mounted)ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text(e.toString()))); } }
+  const OrderDetailScreen({super.key,required this.orderId});
+  final int orderId;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Map<String,dynamic>>(
+      future: context.read<AppController>().api.orderDetail(orderId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator(color: AppColors.blue)));
+        }
+        final d = snapshot.data ?? {};
+        return ScreenFrame(
+          title: 'تفاصيل الطلب',
+          color: AppColors.blue,
+          child: ListView(
+            padding: const EdgeInsets.all(12),
+            children: [
+              PageCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text('الطلب #${d['order_number'] ?? orderId}', style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900)),
+                    Text('${d['status'] ?? ''}', style: const TextStyle(fontSize: 10, color: AppColors.muted)),
+                    const Divider(height: 20),
+                    for (final key in ['subtotal', 'shipping_cost', 'tax', 'total'])
+                      if (d[key] != null)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(key, style: const TextStyle(fontSize: 9, color: AppColors.muted)),
+                            Text('${d[key]} ${d['currency'] ?? 'YER'}', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900)),
+                          ],
+                        ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 9),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => OrderChatScreen(orderId: orderId))),
+                      icon: const Icon(Icons.chat_bubble_outline_rounded),
+                      label: const Text('محادثة'),
+                    ),
+                  ),
+                  const SizedBox(width: 7),
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: () => _confirm(context),
+                      style: FilledButton.styleFrom(backgroundColor: AppColors.emerald),
+                      icon: const Icon(Icons.check_circle_outline),
+                      label: const Text('استلام'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _confirm(BuildContext context) async {
+    try {
+      await context.read<AppController>().api.confirmReceived(orderId);
+      await context.read<AppController>().refreshAll();
+      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم تأكيد الاستلام.')));
+    } catch(e) {
+      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+    }
+  }
 }
 
 class OrderChatScreen extends StatefulWidget { const OrderChatScreen({super.key,required this.orderId}); final int orderId; @override State<OrderChatScreen>createState()=>_OrderChatScreenState(); }
