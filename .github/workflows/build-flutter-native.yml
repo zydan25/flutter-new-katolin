@@ -1,13 +1,10 @@
-# Native Flutter build for the project extracted under flutterapp.
+# Native Flutter build for the project extracted under flutterapp/shopik_app.
 name: Build SHOPIK Native Flutter
 
 on:
   push:
     branches:
       - 'flutter/**'
-    paths:
-      - 'flutterapp/**'
-      - '.github/workflows/build-flutter-native.yml'
   workflow_dispatch:
 
 jobs:
@@ -15,23 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: flutterapp
+        working-directory: flutterapp/shopik_app
     steps:
       - name: Checkout target branch
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Verify extracted Flutter project
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ ! -f pubspec.yaml ]; then
-            echo "pubspec.yaml was not found in flutterapp."
-            echo "Contents of flutterapp:"
-            find . -maxdepth 3 -type f | sort | head -300
-            exit 1
-          fi
+        run: test -f pubspec.yaml
 
       - uses: subosito/flutter-action@v2
         with:
@@ -71,13 +58,13 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: shopik-flutterapp-release-apk
-          path: flutterapp/build/app/outputs/flutter-apk/app-release.apk
+          name: shopik-flutter-native-release-apk
+          path: flutterapp/shopik_app/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
 
       - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
-          name: shopik-flutterapp-release-aab
-          path: flutterapp/build/app/outputs/bundle/release/app-release.aab
+          name: shopik-flutter-native-release-aab
+          path: flutterapp/shopik_app/build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
