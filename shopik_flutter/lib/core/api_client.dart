@@ -17,14 +17,12 @@ class ApiClient {
   final _storage = const FlutterSecureStorage();
   final http.Client _client = http.Client();
   static const _timeout = Duration(seconds: 15);
+  bool _legacyTransferConfirmationPending = false;
 
   Future<String?> token() => _storage.read(key: 'shopik_access_token');
   Future<void> saveToken(String value) => _storage.write(key: 'shopik_access_token', value: value);
   Future<void> clearToken() => _storage.delete(key: 'shopik_access_token');
-  Future<Map<String,String>> _headers({bool json=false}) async {
-    final t=await token();
-    return {'Accept':'application/json',if(json)'Content-Type':'application/json',if(t!=null&&t.isNotEmpty)'Authorization':'Token $t'};
-  }
+  Future<Map<String,String>> _headers({bool json=false}) async { final t=await token(); return {'Accept':'application/json',if(json)'Content-Type':'application/json',if(t!=null&&t.isNotEmpty)'Authorization':'Token $t'}; }
   Uri _uri(String path,[Map<String,dynamic>? query]) { final clean=path.startsWith('/')?path:'/$path'; return Uri.parse('$baseUrl$clean').replace(queryParameters:query?.map((k,v)=>MapEntry(k,v.toString()))); }
   dynamic _decode(http.Response response){if(response.bodyBytes.isEmpty)return {};try{return jsonDecode(utf8.decode(response.bodyBytes));}catch(_){return {'raw':utf8.decode(response.bodyBytes)};}}
   void _check(http.Response response){if(response.statusCode<200||response.statusCode>=300){final data=_decode(response);final message=data is Map&&data['detail']!=null?data['detail'].toString():data is Map&&data['message']!=null?data['message'].toString():'فشل الطلب (${response.statusCode})';throw ApiException(response.statusCode,message,data);}}
@@ -99,9 +97,8 @@ class ApiClient {
   Future<Map<String,dynamic>> gift({required String recipient,required double amount,String currency='YER',String message='',String? idempotencyKey}) async {final key=idempotencyKey??'gift-${DateTime.now().microsecondsSinceEpoch}-${Random().nextInt(1<<30)}';return Map<String,dynamic>.from(await post('/v2/accounting/gifts/',{'recipient':recipient.trim(),'amount':amount,'currency':currency,if(message.trim().isNotEmpty)'message':message.trim()},idempotencyKey:key));}
   Future<List<Map<String,dynamic>>> gifts() async=>_results(await get('/gifts/'));
   Future<Map<String,dynamic>> giftLookup(String phone) async=>Map<String,dynamic>.from(await post('/gifts/lookup/',{'receiver_phone':phone}));
-  // Legacy method name retained for the existing screen, but it now executes the canonical accounting transfer contract.
-  Future<Map<String,dynamic>> createGift({required String receiverPhone,required double amount,String message=''})=>transfer(recipient:receiverPhone,amount:amount,note:message);
-  Future<Map<String,dynamic>> confirmGift(int id) async=>Map<String,dynamic>.from(await post('/gifts/$id/confirm/',{}));
+  Future<Map<String,dynamic>> createGift({required String receiverPhone,required double amount,String message=''}) async {final r=await transfer(recipient:receiverPhone,amount:amount,note:message);_legacyTransferConfirmationPending=true;final recipient=r['recipient'];final recipientName=recipient is Map?'${recipient['name']??receiverPhone}':receiverPhone;return {'id':r['journal']??'', 'recipient_name':recipientName, 'recipient_phone':receiverPhone, 'amount':r['amount']??amount, 'currency':r['currency']??'YER', 'success':r['success']??true, 'message':r['message']??'تم تنفيذ التحويل وتسجيله في القيد المحاسبي.', ...r};}
+  Future<Map<String,dynamic>> confirmGift(int id) async {if(_legacyTransferConfirmationPending){_legacyTransferConfirmationPending=false;return {'success':true,'type':'transfer','id':id,'message':'تم تنفيذ التحويل بالفعل عبر القيد المحاسبي.'};}return Map<String,dynamic>.from(await post('/gifts/$id/confirm/',{}));}
   Future<Map<String,dynamic>> cancelGift(int id) async=>Map<String,dynamic>.from(await post('/gifts/$id/cancel/',{}));
 
   List<Map<String,dynamic>> _results(dynamic data){if(data is List)return List<Map<String,dynamic>>.from(data.map((e)=>Map<String,dynamic>.from(e)));if(data is Map&&data['results'] is List)return List<Map<String,dynamic>>.from((data['results'] as List).map((e)=>Map<String,dynamic>.from(e)));return [];}
