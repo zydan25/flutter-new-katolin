@@ -1,81 +1,71 @@
-name: Build Android APK
+name: Build SHOPIK Flutter APK
 
 on:
   push:
-    branches: [ main, master ]
+    branches:
+      - main
+      - master
+      - 'flutter/**'
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
-  build-native:
-    name: Build Native Android & Flutter APK
+  build-flutter:
+    name: Build standalone SHOPIK Flutter APK
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: shopik_flutter
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Java JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Android NDK 27
-        run: |
-          yes | sdkmanager --licenses || true
-          sdkmanager "ndk;27.0.12077973"
-
-      - name: Set up Flutter SDK
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.0'
-          channel: 'stable'
+          channel: stable
+          cache: true
 
-      - name: Setup Gradle 8.10.2
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.10.2'
+      - name: Generate Android host if missing
+        run: flutter create --platforms=android .
 
-      - name: Get Flutter Dependencies
+      - name: Ensure Internet permission
         run: |
-          cd flutter-katolin/flutter_payment_network
-          flutter pub get
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('android/app/src/main/AndroidManifest.xml')
+          text = p.read_text()
+          permission = '<uses-permission android:name="android.permission.INTERNET" />'
+          if permission not in text:
+              text = text.replace('<manifest ', '<manifest ' + permission, 1)
+              p.write_text(text)
+          PY
 
-      - name: Build Standalone Flutter APK
-        run: |
-          cd flutter-katolin/flutter_payment_network
-          flutter build apk --debug
+      - name: Get dependencies
+        run: flutter pub get
 
-      - name: Build Kotlin Native Host APK
-        run: |
-          cd flutter-katolin
-          gradle wrapper --gradle-version 8.10.2
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon -x test
-        continue-on-error: true
+      - name: Analyze
+        run: flutter analyze
 
-      - name: Upload Native Flutter APK
+      - name: Build release APK
+        run: flutter build apk --release
+
+      - name: Build release AAB
+        run: flutter build appbundle --release
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: shopik-flutter-native-debug-apk
-          path: |
-            flutter-katolin/flutter_payment_network/build/app/outputs/flutter-apk/*.apk
-            flutter-katolin/flutter_payment_network/build/host/outputs/apk/release/*.apk
-            flutter-katolin/flutter_payment_network/build/host/outputs/apk/debug/*.apk
-            flutter-katolin/flutter_payment_network/.android/Flutter/build/outputs/apk/**/*.apk
+          name: shopik-flutter-release-apk
+          path: shopik_flutter/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
           retention-days: 14
 
-      - name: Upload Native Android Kotlin APK
+      - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
-          name: shopik-kotlin-compose-debug-apk
-          path: flutter-katolin/app/build/outputs/apk/debug/*.apk
-          if-no-files-found: warn
+          name: shopik-flutter-release-aab
+          path: shopik_flutter/build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
           retention-days: 14
-
