@@ -12,14 +12,17 @@ on:
 
 jobs:
   build-flutter:
-    name: Build standalone SHOPIK Flutter APK
+    name: Build extracted SHOPIK Flutter APK
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: shopik_flutter
+        working-directory: flutterapp/shopik_app
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Verify extracted Flutter project
+        run: test -f pubspec.yaml
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -82,7 +85,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: shopik-flutter-release-apk
-          path: shopik_flutter/build/app/outputs/flutter-apk/app-release.apk
+          path: flutterapp/shopik_app/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
           retention-days: 14
 
@@ -90,6 +93,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: shopik-flutter-release-aab
-          path: shopik_flutter/build/app/outputs/bundle/release/app-release.aab
+          path: flutterapp/shopik_app/build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 14
