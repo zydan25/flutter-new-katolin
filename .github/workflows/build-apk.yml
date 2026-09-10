@@ -30,6 +30,24 @@ jobs:
       - name: Generate Android host if missing
         run: flutter create --platforms=android .
 
+      - name: Enable FragmentActivity for local_auth
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          root = Path('android/app/src/main')
+          for p in root.rglob('MainActivity.kt'):
+              s = p.read_text()
+              s = s.replace('import io.flutter.embedding.android.FlutterActivity', 'import io.flutter.embedding.android.FlutterFragmentActivity')
+              s = s.replace('class MainActivity: FlutterActivity()', 'class MainActivity: FlutterFragmentActivity()')
+              s = s.replace('class MainActivity : FlutterActivity()', 'class MainActivity : FlutterFragmentActivity()')
+              p.write_text(s)
+          for p in root.rglob('MainActivity.java'):
+              s = p.read_text()
+              s = s.replace('import io.flutter.embedding.android.FlutterActivity;', 'import io.flutter.embedding.android.FlutterFragmentActivity;')
+              s = s.replace('extends FlutterActivity', 'extends FlutterFragmentActivity')
+              p.write_text(s)
+          PY
+
       - name: Ensure Internet permission
         run: |
           python3 - <<'PY'
