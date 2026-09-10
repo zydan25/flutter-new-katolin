@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import '../widgets/common.dart';
 
 class ScreenFrame extends StatelessWidget {
-  const ScreenFrame({super.key, required this.title, required this.child, this.color = AppColors.burgundy, this.actions});
+  const ScreenFrame({super.key, required this.title, required this.child, this.color = AppColors.burgundy, this.actions, this.bottomSheet});
   final String title;
   final Widget child;
   final Color color;
   final List<Widget>? actions;
+  final Widget? bottomSheet;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,6 +21,7 @@ class ScreenFrame extends StatelessWidget {
         actions: actions,
       ),
       body: child,
+      bottomSheet: bottomSheet,
     );
   }
 }
