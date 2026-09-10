@@ -1,0 +1,36 @@
+# Flutter / Dart
+.symlinks/
+**/build/**
+**/.dart_tool/
+**/android/.gradle/
+**/android/app/proguard/
+**/android/app/release/
+**/ios/Pods/
+**/ios/.symlinks/
+**/.flutter-plugins-dependencies
+**/coverage/
+
+# Node / Web
+node_modules/
+web/node_modules/
+web/dist/
+web/build/
+web/.vite/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+web/.env
+web/.env.*
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
+*.iml
+
+# Backups
+_backup/

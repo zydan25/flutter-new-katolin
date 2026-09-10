@@ -1,0 +1,53 @@
+name: Extract Flutter App
+
+on:
+  push:
+    branches:
+      - 'flutter/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Extract Flutter project in place
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET="flutterapp"
+          ZIP="$TARGET/shopik-full-project.zip"
+
+          test -f "$ZIP"
+          mkdir -p "$TARGET"
+
+          echo "Extracting $ZIP into $TARGET"
+          unzip -o "$ZIP" -d "$TARGET"
+
+          echo "Flutter project files found:"
+          find "$TARGET" -maxdepth 4 \( -name pubspec.yaml -o -name 'lib' -type d -o -name 'android' -type d \) -print | sort
+
+      - name: Commit extracted project
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add flutterapp/
+
+          if git diff --cached --quiet; then
+            echo "No extracted changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Extract Flutter project into flutterapp"
+          git push origin HEAD:${{ github.ref_name }}
