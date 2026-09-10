@@ -13,6 +13,7 @@ class AppController extends ChangeNotifier {
   bool loading = false;
   String? error;
   List<Map<String, dynamic>> operations = [];
+  List<Map<String, dynamic>> statement = [];
   List<Map<String, dynamic>> notifications = [];
   List<Product> products = [];
   List<Map<String, dynamic>> vendors = [];
@@ -31,7 +32,8 @@ class AppController extends ChangeNotifier {
     if (prefs.getBool('logged_in') != true) return;
     try {
       final profile = await api.me();
-      user = UserProfile.fromJson(profile['user'] is Map ? Map<String, dynamic>.from(profile['user']) : profile);
+      final rawUser = profile['user'];
+      user = UserProfile.fromJson(rawUser is Map ? Map<String, dynamic>.from(rawUser) : profile);
       await refreshAll(quiet: true);
       _startPolling();
       notifyListeners();
@@ -62,16 +64,44 @@ class AppController extends ChangeNotifier {
     }
   }
 
+  Future<bool> register({required String phone, required String password, required String fullName, required String governorate}) async {
+    loading = true;
+    error = null;
+    notifyListeners();
+    try {
+      final parts = fullName.trim().split(RegExp(r'\s+'));
+      final data = await api.register(
+        phone: phone,
+        password: password,
+        firstName: parts.isNotEmpty ? parts.first : '',
+        middleName: parts.length > 1 ? parts[1] : '',
+        thirdName: parts.length > 2 ? parts[2] : '',
+        lastName: parts.length > 3 ? parts.sublist(3).join(' ') : '',
+        governorate: governorate,
+      );
+      final rawUser = data['user'];
+      user = UserProfile.fromJson(rawUser is Map ? Map<String, dynamic>.from(rawUser) : <String, dynamic>{});
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('logged_in', true);
+      await refreshAll(quiet: true);
+      _startPolling();
+      return true;
+    } catch (e) {
+      error = e.toString();
+      return false;
+    } finally {
+      loading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> logout({bool localOnly = false}) async {
     _poller?.cancel();
-    if (!localOnly) {
-      try {
-        await api.logout();
-      } catch (_) {}
-    }
+    if (!localOnly) await api.logout();
     user = null;
     walletBalance = 0;
     operations = [];
+    statement = [];
     notifications = [];
     products = [];
     vendors = [];
@@ -89,39 +119,32 @@ class AppController extends ChangeNotifier {
   void _startPolling() {
     _poller?.cancel();
     _poller = Timer.periodic(const Duration(seconds: 15), (_) async {
-      try {
-        await refreshWalletAndReports();
-      } catch (_) {}
+      try { await refreshWalletAndReports(); } catch (_) {}
     });
   }
 
   Future<void> refreshWalletAndReports() async {
-    final rows = await api.wallets();
-    if (rows.isNotEmpty) {
-      walletBalance = num.tryParse('${rows.first['balance'] ?? 0}') ?? 0;
-    }
+    final balance = await api.walletBalance();
+    final rawAvailable = balance['customer'] is Map ? (balance['customer'] as Map)['available'] : balance['available'];
+    if (rawAvailable != null) walletBalance = num.tryParse('$rawAvailable') ?? walletBalance;
     try {
-      operations = await api.serviceReports();
+      final rawStatement = await api.walletStatement();
+      final value = rawStatement['statement'];
+      statement = value is List ? value.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList() : [];
     } catch (_) {}
+    try { operations = await api.serviceReports(); } catch (_) {}
     notifyListeners();
   }
 
   Future<void> refreshCatalog() async {
     final data = await api.serviceCatalog();
     final raw = data['categories'];
-    serviceCatalogRoots = raw is List
-        ? raw.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList()
-        : [];
+    serviceCatalogRoots = raw is List ? raw.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList() : [];
     notifyListeners();
   }
 
   Future<void> refreshOptional() async {
-    Future<void> safe(Future<void> Function() action) async {
-      try {
-        await action();
-      } catch (_) {}
-    }
-
+    Future<void> safe(Future<void> Function() action) async { try { await action(); } catch (_) {} }
     await Future.wait([
       safe(() async => notifications = await api.notifications()),
       safe(() async => products = (await api.products()).map(Product.fromJson).toList()),
@@ -137,21 +160,14 @@ class AppController extends ChangeNotifier {
   }
 
   Future<void> refreshAll({bool quiet = false}) async {
-    if (!quiet) {
-      loading = true;
-      error = null;
-      notifyListeners();
-    }
+    if (!quiet) { loading = true; error = null; notifyListeners(); }
     try {
       await refreshWalletAndReports();
       await refreshOptional();
     } catch (e) {
       error = e.toString();
     } finally {
-      if (!quiet) {
-        loading = false;
-        notifyListeners();
-      }
+      if (!quiet) { loading = false; notifyListeners(); }
     }
   }
 
@@ -160,19 +176,11 @@ class AppController extends ChangeNotifier {
     void walk(dynamic node) {
       if (node is! Map) return;
       final services = node['services'];
-      if (services is List) {
-        for (final entry in services) {
-          if (entry is Map) out.add(Map<String, dynamic>.from(entry));
-        }
-      }
+      if (services is List) for (final entry in services) if (entry is Map) out.add(Map<String, dynamic>.from(entry));
       final children = node['children'];
-      if (children is List) {
-        for (final entry in children) walk(entry);
-      }
+      if (children is List) for (final entry in children) walk(entry);
       final categories = node['categories'];
-      if (categories is List) {
-        for (final entry in categories) walk(entry);
-      }
+      if (categories is List) for (final entry in categories) walk(entry);
     }
     for (final root in serviceCatalogRoots) walk(root);
     return out;
@@ -183,7 +191,7 @@ class AppController extends ChangeNotifier {
       'yemen_mobile': ['yemen_mobile', 'يمن موبايل'],
       'you': ['you', 'يو'],
       'sabafon': ['sabafon', 'سبأفون'],
-      'yemen': [' y ', 'y_', 'واي', 'واي موبايل'],
+      'y': [' y ', ' y_', 'واي', 'واي موبايل'],
       'yemen4g': ['4g', 'فورجي', 'يمن 4g'],
       'yemen_net': ['yemen_net', 'يمن نت', 'adsl'],
       'aden_net': ['aden_net', 'عدن نت'],
@@ -195,20 +203,15 @@ class AppController extends ChangeNotifier {
     }).toList();
   }
 
-  Future<Map<String, dynamic>> requestService({
-    required int serviceId,
-    required Map<String, dynamic> payload,
-    String? itemType,
-    int? itemId,
-  }) async {
-    final tx = await api.serviceRequest(serviceId: serviceId, payload: payload, itemType: itemType, itemId: itemId);
+  Future<Map<String, dynamic>> requestService({required int serviceId, required Map<String, dynamic> payload, String? itemType, int? itemId, String? idempotencyKey}) async {
+    final tx = await api.serviceRequest(serviceId: serviceId, payload: payload, itemType: itemType, itemId: itemId, idempotencyKey: idempotencyKey);
     var latest = tx;
     final id = tx['id']?.toString();
-    if (id != null && ['accepted', 'queued', 'pending', 'processing'].contains('${tx['status']}')) {
+    if (id != null && ['accepted', 'queued', 'pending', 'pending_provider', 'processing'].contains('${tx['status']}')) {
       for (var i = 0; i < 20; i++) {
         await Future.delayed(const Duration(milliseconds: 1200));
         latest = await api.serviceTransaction(id);
-        if (['success', 'failed', 'completed', 'rejected'].contains('${latest['status']}')) break;
+        if (['success', 'failed', 'refunded', 'manual_review'].contains('${latest['status']}')) break;
       }
     }
     return latest;
@@ -216,9 +219,5 @@ class AppController extends ChangeNotifier {
 
   Future<Map<String, dynamic>> recipientLookup(String phone) => api.giftLookup(phone);
 
-  @override
-  void dispose() {
-    _poller?.cancel();
-    super.dispose();
-  }
+  @override void dispose() { _poller?.cancel(); super.dispose(); }
 }
