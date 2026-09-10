@@ -56,7 +56,13 @@ jobs:
           text = p.read_text()
           permission = '<uses-permission android:name="android.permission.INTERNET" />'
           if permission not in text:
-              text = text.replace('<manifest ', '<manifest ' + permission, 1)
+              manifest_start = text.find('<manifest')
+              if manifest_start == -1:
+                  raise SystemExit('AndroidManifest.xml does not contain a <manifest> element')
+              manifest_end = text.find('>', manifest_start)
+              if manifest_end == -1:
+                  raise SystemExit('AndroidManifest.xml has an invalid <manifest> opening tag')
+              text = text[:manifest_end + 1] + '\n    ' + permission + text[manifest_end + 1:]
               p.write_text(text)
           PY
 
