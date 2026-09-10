@@ -1,6 +1,9 @@
 name: Extract Flutter App
 
 on:
+  push:
+    branches:
+      - 'flutter/**'
   workflow_dispatch:
 
 permissions:
@@ -13,7 +16,7 @@ jobs:
       - name: Checkout target branch
         uses: actions/checkout@v4
         with:
-          ref: flutter/complete-native-rebuild
+          ref: ${{ github.ref_name }}
           fetch-depth: 0
 
       - name: Extract Flutter project in place
@@ -25,12 +28,14 @@ jobs:
 
           test -f "$ZIP"
           mkdir -p "$TARGET"
+
+          echo "Extracting $ZIP into $TARGET"
           unzip -o "$ZIP" -d "$TARGET"
 
-          echo "Extracted contents in $TARGET:"
-          find "$TARGET" -maxdepth 2 -type f | sort
+          echo "Flutter project files found:"
+          find "$TARGET" -maxdepth 4 \( -name pubspec.yaml -o -name 'lib' -type d -o -name 'android' -type d \) -print | sort
 
-      - name: Commit extracted project only
+      - name: Commit extracted project
         shell: bash
         run: |
           set -euo pipefail
@@ -40,9 +45,9 @@ jobs:
           git add flutterapp/
 
           if git diff --cached --quiet; then
-            echo "No changes to commit."
+            echo "No extracted changes to commit."
             exit 0
           fi
 
           git commit -m "Extract Flutter project into flutterapp"
-          git push origin HEAD:flutter/complete-native-rebuild
+          git push origin HEAD:${{ github.ref_name }}
