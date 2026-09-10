@@ -1,0 +1,72 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../core/app_controller.dart';
+import '../widgets/common.dart';
+
+class PaymentScreen extends StatefulWidget { const PaymentScreen({super.key}); @override State<PaymentScreen> createState() => _PaymentScreenState(); }
+class _PaymentScreenState extends State<PaymentScreen> {
+  final phone = TextEditingController();
+  int tab = 2;
+  String operator = 'yemen_mobile';
+  bool loading = false;
+  Map<String, dynamic>? inquiry;
+  final ids = const {'yemen_mobile': [4,6,7], 'you': [13], 'sabafon': [9], 'yemen4g': [20,22], 'yemen_net': [23,25]};
+  final names = const {'yemen_mobile':'يمن موبايل','you':'يو (YOU)','sabafon':'سبأفون','yemen4g':'يمن 4G','yemen_net':'يمن نت'};
+  Color get opColor { switch(operator){case 'you':return Colors.amber.shade700;case 'sabafon':return Colors.blue;case 'yemen4g':return AppColors.blue;case 'yemen_net':return AppColors.indigo;default:return AppColors.burgundy;} }
+  @override void dispose(){phone.dispose(); super.dispose();}
+  Future<void> _inquiry(String type) async {
+    if (phone.text.trim().isEmpty) return;
+    setState(() => loading = true); final app = context.read<AppController>();
+    try {
+      int serviceId = type == 'offers' ? 7 : 6;
+      Map<String,dynamic> payload = {'mobile': phone.text.trim()};
+      if (operator == 'yemen4g') serviceId = 22;
+      if (operator == 'yemen_net') { serviceId = 25; payload['type'] = type == 'line' ? 'line' : 'adsl'; }
+      final result = await app.requestService(serviceId: serviceId, payload: payload);
+      setState(() => inquiry = result);
+      if (result['status'] == 'failed') throw Exception(result['error_message'] ?? 'فشل الاستعلام');
+    } catch(e) { if(mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()))); }
+    finally { if(mounted) setState(() => loading = false); }
+  }
+  Future<void> _pay({int? itemId, String? itemType, num? presetAmount, required String label}) async {
+    if(phone.text.trim().isEmpty) return;
+    final amountCtrl = TextEditingController(text: '${presetAmount ?? ''}');
+    final amount = await showDialog<num>(context: context, builder: (_) => AlertDialog(title: const Text('تأكيد الطلب', style: TextStyle(fontWeight: FontWeight.w900)), content: Column(mainAxisSize: MainAxisSize.min, children:[Text(label,textAlign:TextAlign.center), const SizedBox(height:10), TextField(controller: amountCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText:'المبلغ', suffixText:'ر.ي'))]), actions:[TextButton(onPressed:()=>Navigator.pop(context),child:const Text('إلغاء')), FilledButton(onPressed:()=>Navigator.pop(context,num.tryParse(amountCtrl.text)),child:const Text('موافق'))]));
+    amountCtrl.dispose(); if(amount == null || amount <= 0) return;
+    setState(() => loading = true); final app=context.read<AppController>();
+    try {
+      final serviceId = operator == 'you' ? 13 : operator == 'sabafon' ? 9 : operator == 'yemen4g' ? 20 : operator == 'yemen_net' ? 23 : 4;
+      final tx = await app.requestService(serviceId: serviceId, payload: {'mobile': phone.text.trim(),'amount': amount.toStringAsFixed(2)}, itemType: itemType, itemId: itemId);
+      if (tx['status'] == 'failed') throw Exception(tx['error_message'] ?? tx['note'] ?? 'فشلت العملية لدى المزود');
+      await app.refreshWalletAndReports();
+      if(mounted) showDialog(context:context,builder:(_)=>AlertDialog(shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(20)),title:const Text('نجاح العملية',textAlign:TextAlign.center,style:TextStyle(fontWeight:FontWeight.w900)),content:Text('تم تنفيذ $label للرقم ${phone.text.trim()}\nالمرجع: ${tx['id'] ?? '-'}',textAlign:TextAlign.center),actions:[FilledButton(onPressed:()=>Navigator.pop(context),child:const Text('تم'))]));
+    } catch(e){if(mounted) showDialog(context:context,builder:(_)=>AlertDialog(title:const Text('فشل تنفيذ العملية'),content:Text(e.toString()),actions:[TextButton(onPressed:()=>Navigator.pop(context),child:const Text('موافق'))]));}
+    finally {if(mounted)setState(()=>loading=false);}
+  }
+  @override Widget build(BuildContext context){
+    final app=context.watch<AppController>();
+    final mainTabs = operator=='yemen4g' ? const ['باقة يمن 4G','رصيد يمن 4G','تغيير الباقة','فايبر'] : operator=='yemen_net' ? const ['الانترنت الارضي','الهاتف الثابت'] : const ['رصيد','فوري','باقات','جملة','ريال'];
+    return Stack(children:[ListView(padding:const EdgeInsets.fromLTRB(12,0,12,20),children:[
+      Container(padding:const EdgeInsets.fromLTRB(14,14,14,12),decoration:BoxDecoration(color:opColor,borderRadius:const BorderRadius.vertical(bottom:Radius.circular(18))),child:Row(mainAxisAlignment:MainAxisAlignment.spaceBetween,children:[IconButton(onPressed:()=>app.refreshWalletAndReports(),color:Colors.white,icon:const Icon(Icons.refresh)),Column(children:[const Text('رصيدي',style:TextStyle(color:Colors.white,fontSize:11)),Text('${app.walletBalance.toStringAsFixed(2)} ر.ي',style:const TextStyle(color:Colors.white,fontWeight:FontWeight.w900,fontSize:17))]),Text(names[operator]!,style:const TextStyle(color:Colors.white,fontWeight:FontWeight.w900))]),
+      const SizedBox(height:10),
+      SingleChildScrollView(scrollDirection:Axis.horizontal,child:Row(children:[for(final e in names.entries) Padding(padding:const EdgeInsets.only(left:6),child:ChoiceChip(label:Text(e.value,style:const TextStyle(fontSize:11,fontWeight:FontWeight.w800)),selected:operator==e.key,onSelected:(_){setState(()=>operator=e.key);} ))])),
+      const SizedBox(height:10),
+      PageCard(child:Row(children:[Expanded(child:TextField(controller:phone,keyboardType:TextInputType.phone,textDirection:TextDirection.ltr,maxLength:9,decoration:const InputDecoration(counterText:'',labelText:'رقم الهاتف (9 أرقام)',prefixText:'+967  '))),const SizedBox(width:8),IconButton(onPressed:()=>phone.clear(),icon:const Icon(Icons.close))])),
+      const SizedBox(height:10),
+      Container padding:const EdgeInsets.all(4),decoration:BoxDecoration(color:opColor.withOpacity(.12),borderRadius:BorderRadius.circular(14)),child:Row(children:[for(int i=0;i<mainTabs.length;i++)Expanded(child:GestureDetector(onTap:()=>setState(()=>tab=i),child:Container(padding:const EdgeInsets.symmetric(vertical:9),decoration:BoxDecoration(color:tab==i?opColor:Colors.transparent,borderRadius:BorderRadius.circular(10)),child:Text(mainTabs[i],textAlign:TextAlign.center,style:TextStyle(fontSize:11,fontWeight:FontWeight.w900,color:tab==i?Colors.white:Colors.black87)))))])),
+      const SizedBox(height:10),
+      if(tab==0) _balanceTab(app),
+      if(tab==1) _instantTab(app),
+      if(tab==2) _packagesTab(app),
+      if(operator=='yemen4g' && tab==0) _fourG(app),
+      if(operator=='yemen_net' && (tab==0 || tab==1)) _netTab(app),
+    ]),BusyOverlay(visible:loading)]);
+  }
+  Widget _balanceTab(AppController app)=>Column(children:[if(inquiry!=null) PageCard(child:Text('نتيجة الاستعلام: ${inquiry!['result'] ?? inquiry}',textAlign:TextAlign.center,style:const TextStyle(fontSize:11,fontWeight:FontWeight.w800))),const SizedBox(height:8),PageCard(child:Column(children:[TextField(keyboardType:TextInputType.number,decoration:const InputDecoration(labelText:'أدخل المبلغ')),const SizedBox(height:8),Row(children:[Expanded(child:FilledButton(onPressed:()=>_pay(label:'تسديد الرصيد'),style:FilledButton.styleFrom(backgroundColor:opColor),child:const Text('تسديد'))),if(ids[operator]!.length>1) ...[const SizedBox(width:7),Expanded(child:OutlinedButton(onPressed:()=>_inquiry('balance'),child:const Text('استعلام')))]])]))]);
+  Widget _instantTab(AppController app){final rows=operator=='yemen_mobile'?[200,400,600,800,1000,1200,2200]:operator=='sabafon'?[22,40,45,60,85,100,125,150,209]:[410,830,1000,1250,2500,5000,7500];return GridView.count(shrinkWrap:true,physics:const NeverScrollableScrollPhysics(),crossAxisCount:3,crossAxisSpacing:8,mainAxisSpacing:8,childAspectRatio:1.1,children:[for(final n in rows)_denom('${n} ر.ي',n*1.21)]);}
+  Widget _denom(String title,num price)=>InkWell(onTap:()=>_pay(label:'فئة $title',presetAmount:price),borderRadius:BorderRadius.circular(16),child:Container(decoration:BoxDecoration(color:Colors.white,borderRadius:BorderRadius.circular(16),border:Border.all(color:const Color(0xFFE2E8F0))),child:Column(children:[Container(width:double.infinity,padding:const EdgeInsets.all(7),decoration:BoxDecoration(color:opColor,borderRadius:const BorderRadius.vertical(top:Radius.circular(16))),child:Text(title,textAlign:TextAlign.center,style:const TextStyle(color:Colors.white,fontWeight:FontWeight.w900,fontSize:12))),const Spacer(),Text(price.toStringAsFixed(0),style:const TextStyle(fontWeight:FontWeight.w900,fontSize:16)),const SizedBox(height:4),const Text('اضغط للتسديد',style:TextStyle(fontSize:9,color:Colors.black45)),const Spacer()])));
+  Widget _packagesTab(AppController app){final svc=operator=='yemen_mobile'?6:operator=='yemen4g'?22:operator=='yemen_net'?25:operator=='sabafon'?9:13;return FutureBuilder<Map<String,dynamic>>(future:app.api.serviceDetail(svc),builder:(c,s){if(s.connectionState==ConnectionState.waiting)return const Center(child:Padding(padding:EdgeInsets.all(30),child:CircularProgressIndicator()));if(s.hasError)return PageCard(child:Text('تعذر جلب كتالوج $operator من الخادم: ${s.error}',textAlign:TextAlign.center));final d=s.data??{};final raw=d['items']??d['plans']??d['denominations']??d['options']??d['results']??[];if(raw is! List || raw.isEmpty)return const PageCard(child:Text('لا توجد باقات متاحة حاليًا في الكتالوج.',textAlign:TextAlign.center));return Column(children:[for(final x in raw.take(60))_serviceCard(Map<String,dynamic>.from(x))]);});}
+  Widget _serviceCard(Map<String,dynamic> x){final id=int.tryParse('${x['id']??''}');final price=num.tryParse('${x['sale_price']??x['price']??x['amount']??0}')??0;final name='${x['name']??x['title']??x['label']??'خدمة'}';return Padding(padding:const EdgeInsets.only(bottom:8),child:InkWell(onTap:()=>_pay(itemId:id,itemType:id==null?null:'telecom_plans',presetAmount:price,label:name),borderRadius:BorderRadius.circular(16),child:PageCard(child:Row(children:[CircleAvatar(backgroundColor:opColor,child:const Icon(Icons.wifi,color:Colors.white,size:17)),const SizedBox(width:10),Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text(name,maxLines:2,overflow:TextOverflow.ellipsis,style:const TextStyle(fontWeight:FontWeight.w900,fontSize:12)),Text('${x['description']??x['validity']??''}',maxLines:2,overflow:TextOverflow.ellipsis,style:const TextStyle(color:Colors.black54,fontSize:10))])),Text('${price.toStringAsFixed(0)} ر.ي',style:TextStyle(fontWeight:FontWeight.w900,color:opColor,fontSize:13))]))));}
+  Widget _fourG(AppController app)=>PageCard(child:Column(children:[const Text('استعلام يمن 4G',style:TextStyle(fontWeight:FontWeight.w900)),const SizedBox(height:8),OutlinedButton(onPressed:()=>_inquiry('4g'),child:const Text('استعلام')),if(inquiry!=null)Padding(padding:const EdgeInsets.only(top:8),child:Text('${inquiry!['result']??inquiry}',textAlign:TextAlign.center,style:const TextStyle(fontSize:11)))]));
+  Widget _netTab(AppController app)=>PageCard(child:Column(children:[Text(operator=='yemen_net'?'بيانات يمن نت':'الهاتف الثابت',style:const TextStyle(fontWeight:FontWeight.w900)),const SizedBox(height:8),OutlinedButton(onPressed:()=>_inquiry(tab==1?'line':'adsl'),child:const Text('استعلام')),if(inquiry!=null)Padding(padding:const EdgeInsets.only(top:8),child:Text('${inquiry!['result']??inquiry}',textAlign:TextAlign.center,style:const TextStyle(fontSize:11)))]));
+}
