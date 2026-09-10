@@ -1,0 +1,48 @@
+name: Extract Flutter App
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: flutter/complete-native-rebuild
+          fetch-depth: 0
+
+      - name: Extract Flutter project in place
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET="flutterapp"
+          ZIP="$TARGET/shopik-full-project.zip"
+
+          test -f "$ZIP"
+          mkdir -p "$TARGET"
+          unzip -o "$ZIP" -d "$TARGET"
+
+          echo "Extracted contents in $TARGET:"
+          find "$TARGET" -maxdepth 2 -type f | sort
+
+      - name: Commit extracted project only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add flutterapp/
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Extract Flutter project into flutterapp"
+          git push origin HEAD:flutter/complete-native-rebuild
